@@ -1,0 +1,12 @@
+{
+    "wallpapers": [
+        "wallpapers/0.jpg"
+    ],
+    "themes": [
+        {
+            "name": "default",
+            "borderColor": "#eeeeee",
+            "backgroundColor": "#aaaaaa"
+        }
+    ]
+}
