@@ -3,7 +3,6 @@
 </template>
 
 <script>
-import config from "./config.json";
 import Desktop from "./components/Desktop.vue";
 
 export default {

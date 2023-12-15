@@ -1,7 +1,8 @@
 <template>
   <div
     id="window"
-    :style="{ width: `${width}px`, height: `${height}px`, borderColor: options.theme.borderColor, top: `${y}px`, left: `${x}px`, zIndex: zIndex }"
+    :style="{ width: `${width}px`, height: `${height}px`, borderColor: options.theme.borderColor, top: `${y}px`, left: `${x}px` }"
+    @mousedown.prevent="$emit('focus')"
   >
     <div
       class="toolbar"
@@ -9,6 +10,22 @@
       @mousedown.prevent="startDrag"
     >
       <p id="title">{{ title }}</p>
+      <v-icon
+        size="16"
+        color="white"
+        class="toolbar-icon"
+        @click="$emit('close')"
+      >mdi-close-box-outline</v-icon>
+      <v-icon
+        size="16"
+        color="white"
+        class="toolbar-icon"
+      >mdi-window-maximize</v-icon>
+      <v-icon
+        size="16"
+        color="white"
+        class="toolbar-icon"
+      >mdi-window-minimize</v-icon>
     </div>
     <div
       class="background"
@@ -30,8 +47,9 @@
         @mousedown.prevent="ev => startResize(ev, 'right')"
       ></div>
       <iframe
+        ref="frame"
         class="view"
-        :style="{ pointerEvents: (action.resizing) ? 'none' : 'auto'}"
+        :style="{ pointerEvents: (iframeCapturesEvents) ? 'auto' : 'none'}"
         :src="src"
       ></iframe>
     </div>
@@ -69,8 +87,8 @@ export default {
       type: Number,
       default: 0,
     },
-    zIndex: {
-      type: Number,
+    focused: {
+      type: Boolean,
       default: false,
     },
   },
@@ -92,6 +110,15 @@ export default {
     };
   },
 
+  computed: {
+    iframeCapturesEvents() {
+      if (this.action.resizing || this.action.dragging) {
+        return false;
+      }
+      return this.focused;
+    },
+  },
+
   methods: {
     startDrag(ev) {
       this.action.dragging = true;
@@ -99,8 +126,6 @@ export default {
       this.action.mouseY = ev.clientY;
       window.addEventListener("mousemove", this.drag);
       window.addEventListener("mouseup", this.stopDrag, { once: true });
-      // NOTE: parent is responsible for focus / blur.
-      this.$emit('focus');
     },
 
     startResize(ev, edge) {
@@ -113,15 +138,34 @@ export default {
     },
 
     drag(ev) {
-      console.log("dragging")
-      this.x += ev.clientX - this.action.mouseX;
-      this.y += ev.clientY - this.action.mouseY;
+      const parent = this.$el.parentElement;
+      const bounds = parent.getBoundingClientRect()
+
+      let x = this.x, y = this.y;
+      x += ev.clientX - this.action.mouseX;
+      y += ev.clientY - this.action.mouseY;
+
+      if (y <= 0) {
+        return;
+      }
+
+      if (ev.clientX <= bounds.left) { // left edge
+        return;
+      } else if (ev.clientX >= bounds.right) { // right edge
+        return;
+      } else if (ev.clientY <= bounds.top) { // top edge
+        return;
+      } else if (ev.clientY >= bounds.bottom) { // bottom edge
+        return;      
+      }
+
+      this.x = x;
+      this.y = y;
       this.action.mouseX = ev.clientX;
       this.action.mouseY = ev.clientY;
     },
 
     resize(ev) {
-      console.log("resizing", this.action.direction);
       const x = ev.clientX - this.action.mouseX;
       const y = ev.clientY - this.action.mouseY;
       this.action.mouseX = ev.clientX;
@@ -136,7 +180,6 @@ export default {
           this.width -= x;
           break;
         case "right":
-          const amount = ev.clientX - this.action.mouseX;
           this.width += x;
           break;
       }
@@ -194,13 +237,20 @@ export default {
   text-align: left;
 }
 
+.toolbar-icon {
+  cursor: pointer;
+  float: right;
+  margin: 4px;
+}
+
 #title {
   margin: 0px;
   padding-top: 3px;
   padding-left: 4px;
   font-weight: bold;
-  width: 100%;
+  color: white;
   overflow: hidden;
+  float: left;
 }
 
 .background {

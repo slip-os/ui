@@ -9,10 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mdi/font": "^7.3.67",
+    "roboto-fontface": "^0.10.0",
     "vue": "^3.3.11"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",
-    "vite": "^5.0.8"
+    "unplugin-fonts": "^1.1.1",
+    "vite": "^5.0.8",
+    "vite-plugin-vuetify": "^2.0.1",
+    "vuetify": "^3.4.7",
+    "vuex": "^4.0.2"
   }
 }

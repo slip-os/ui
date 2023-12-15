@@ -5,8 +5,8 @@
     "themes": [
         {
             "name": "default",
-            "borderColor": "#eeeeee",
-            "backgroundColor": "#aaaaaa"
+            "borderColor": "#1e50a9",
+            "backgroundColor": "#7e8eaa"
         }
     ]
 }

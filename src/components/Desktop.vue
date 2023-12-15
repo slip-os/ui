@@ -1,20 +1,24 @@
 <template>
-  <div
-    id="screen"
-    :style="{ backgroundImage: `url(${wallpaper})` }"
-  >
+  <v-app>
+    <v-toolbar density="compact" title="Application"></v-toolbar>
 
-    <Window
-      v-for="(window, i) in windows"
-      :title="window.title"
-      :src="window.src"
-      :initialX="i * 40"
-      :initialY="i * 40"
-      :zIndex="window.order"
-      @focus="focus(i)"
-    ></Window>
-  </div>
+    <div
+      id="screen"
+    >
 
+      <Window
+        v-for="(window, i) in windows"
+        :title="window.title"
+        :src="window.src"
+        :initialX="i * 40"
+        :initialY="i * 40"
+        :focused="window.order === windows.length"
+        :style="{ zIndex: window.order }"
+        @focus="focus(i)"
+        @close="close(i)"
+      ></Window>
+    </div>
+  </v-app>
 </template>
 
 <script>
@@ -29,13 +33,23 @@ export default {
   },
 
   data() {
+    const windows = [];
+
+    for (let i = 1; i < 10; i++) {
+      windows.push({
+        title: `Test Window #${i}`,
+        src: null,
+        order: i,
+      })
+    }
+
     return {
-      wallpaper: options.wallpaper,
-      windows: [
-        { title: "Test Window #1", src: "", order: 1 },
-        { title: "Test Window #2", src: "", order: 2 },
-      ],
+      windows,
     };
+  },
+
+  beforeCreate() {
+    document.body.style.backgroundImage = `url(${options.wallpaper})`;
   },
 
   methods: {
@@ -49,9 +63,18 @@ export default {
       });
       this.windows[index].order = topOrder;
     },
+
+    close(index) {
+      this.windows.splice(index, 1);
+    },
   },
 }
 </script>
 
-<style scoped>
+<style>
+#screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 </style>
